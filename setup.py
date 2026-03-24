@@ -18,10 +18,10 @@ def get_version(rel_path):
 setup(
     name = 'javiface',
     version = get_version("javiface/__init__.py"),
-    description = 'Efficient and accurate image-based head pose estimation',
+    description = 'Face Similarity',
     long_description = "".join(open("README.md", "r").readlines()),
     long_description_content_type = "text/markdown",
-    url = 'https://github.com/thohemp/6DRepNet',
+    url = 'https://github.com/javierjdaza/javiface/tree/main',
     author = 'Javier Javier Daza',
     author_email = 'javierjdaza@gmail.com',
     license = 'MIT',
