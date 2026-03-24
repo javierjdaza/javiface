@@ -160,6 +160,9 @@ Thresholds are calibrated on the test set to balance FAR and FRR for each scenar
 
 ### Selfie vs Selfie
 
+![Similarity Distribution](plots/similarity_distribution.png)
+![ROC & PR-AUC Curves](plots/roc_prauc_curves.png)
+
 | Metric              | Value      |
 | ------------------- | ---------- |
 | ROC-AUC             | 0.9993     |

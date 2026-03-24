@@ -100,6 +100,10 @@ print(result)
 | Selfie vs ID document | 0.9951  | 1.862 % | 97.31 %   | 97.47 % |
 | ID vs ID              | 0.9930  | 2.228 % | 97.60 %   | 97.08 % |
 
+#### Similarity Distribution — Selfie vs Selfie
+
+![Similarity Distribution](plots/similarity_distribution.png)
+
 Full training details and evaluation breakdown → [MODEL_CARD.md](MODEL_CARD.md)
 
 ---
