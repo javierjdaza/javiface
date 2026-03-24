@@ -63,7 +63,7 @@ img2 = Image.open("id_photo.jpg")
 result = verifier.compare(img1, img2, threshold = 0.2621)
 
 print(result)
-# {'similarity': 0.214, 'same_person': True}
+# {'similarity': 0.214, 'same_person': False}
 ```
 
 ---
@@ -84,21 +84,21 @@ print(result)
 
 > ResNet-50 backbone + ArcFace head, trained from scratch on ~860 K face images across 94 K identities.
 
-| Field              | Value                                      |
-| ------------------ | ------------------------------------------ |
-| **Architecture**   | ResNet-50 + ArcFace (m=0.5, s=64)          |
-| **Embedding dim**  | 512 — L2-normalized (unit hypersphere)     |
-| **Training data**  | 861 597 images · 94 261 identities         |
-| **Export format**  | ONNX (CUDA / CoreML / CPU)                 |
-| **Primary use**    | KYC — selfie vs ID document verification  |
+| Field             | Value                                    |
+| ----------------- | ---------------------------------------- |
+| **Architecture**  | ResNet-50 + ArcFace (m=0.5, s=64)        |
+| **Embedding dim** | 512 — L2-normalized (unit hypersphere)   |
+| **Training data** | 861 597 images · 94 261 identities       |
+| **Export format** | ONNX (CUDA / CoreML / CPU)               |
+| **Primary use**   | KYC — selfie vs ID document verification |
 
 ### Performance
 
-| Scenario              | ROC-AUC | EER       | Precision | Recall  |
-| --------------------- | ------- | --------- | --------- | ------- |
-| Selfie vs Selfie      | 0.9993  | 0.485 %   | 99.54 %   | 99.33 % |
-| Selfie vs ID document | 0.9951  | 1.862 %   | 97.31 %   | 97.47 % |
-| ID vs ID              | 0.9930  | 2.228 %   | 97.60 %   | 97.08 % |
+| Scenario              | ROC-AUC | EER     | Precision | Recall  |
+| --------------------- | ------- | ------- | --------- | ------- |
+| Selfie vs Selfie      | 0.9993  | 0.485 % | 99.54 %   | 99.33 % |
+| Selfie vs ID document | 0.9951  | 1.862 % | 97.31 %   | 97.47 % |
+| ID vs ID              | 0.9930  | 2.228 % | 97.60 %   | 97.08 % |
 
 Full training details and evaluation breakdown → [MODEL_CARD.md](MODEL_CARD.md)
 
