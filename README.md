@@ -57,7 +57,10 @@ img1 = Image.open("selfie.jpg")
 img2 = Image.open("id_photo.jpg")
 
 # Compare
-result = verifier.compare(img1, img2, threshold=0.1838)
+# threshold = 0.2621 -> Selfie vs Selfie [default]
+# threshold = 0.1838 -> Selfie vs ID document
+# threshold = 0.1990 -> ID document vs ID document
+result = verifier.compare(img1, img2, threshold = 0.2621)
 
 print(result)
 # {'similarity': 0.214, 'same_person': True}

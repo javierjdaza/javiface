@@ -32,7 +32,7 @@ class FaceVerifier:
       tensor = self.TRANSFORM(img).unsqueeze(0).numpy()
       return self.sess.run(['embedding'], {'image': tensor})[0][0]
 
-  def compare(self, image_pillow_1, image_pillow_2, threshold):
+  def compare(self, image_pillow_1, image_pillow_2, threshold = 0.2621):
       embedding_1 = self.get_embedding(image_pillow_1)
       embedding_2 = self.get_embedding(image_pillow_2)
       
