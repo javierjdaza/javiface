@@ -25,7 +25,7 @@ class FaceVerifier:
 
       self.sess = ort.InferenceSession(onnx_path, providers = providers)
       self.device = device
-      print(f'FaceVerifier loaded — provider: {device}')
+      print(f'JaviFace loaded — provider: {device}')
 
   def get_embedding(self, image_pillow):
       img = image_pillow.convert('RGB')
