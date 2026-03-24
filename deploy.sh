@@ -1,8 +1,6 @@
-pip install wheel
-python setup.py bdist_wheel
-python setup.py sdist
-pip install twine
+pip install wheel twine
+python setup.py sdist bdist_wheel
 twine upload dist/*
 rm -rf build
 rm -rf dist
-rm -rf sixdrepnet.egg-info
+rm -rf javiface.egg-info

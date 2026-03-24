@@ -17,6 +17,6 @@ packaging==26.0
 pillow==12.1.1
 protobuf==7.34.1
 sympy==1.14.0
-torch==2.11.0
-torchvision==0.26.0
+torch==1.7.1
+torchvision==0.25.0
 typing_extensions==4.15.0
