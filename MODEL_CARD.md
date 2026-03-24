@@ -150,6 +150,7 @@ Thresholds are calibrated on the test set to balance FAR and FRR for each scenar
 | --------------------- | --------- | ------------------------ |
 | Selfie vs Selfie      | `0.2632`  | EER ≈ 0.485 %            |
 | Selfie vs ID document | `0.1869`  | EER ≈ 1.862 %            |
+| ID document vs ID     | `0.1990`  | EER ≈ 2.228 %            |
 
 > **Lower threshold = stricter match.** ID document photos have different illumination, compression artifacts, and perspective compared to selfies, so a lower similarity is expected even for genuine pairs — the threshold is adjusted accordingly.
 
@@ -189,6 +190,23 @@ Thresholds are calibrated on the test set to balance FAR and FRR for each scenar
 | TAR @ FAR = 10⁻⁴   | 91.03 %    |
 | Decision threshold  | 0.1869     |
 | Positive pairs      | 123 600    |
+| Negative pairs      | 500 000    |
+
+### ID Document vs ID Document
+
+| Metric              | Value      |
+| ------------------- | ---------- |
+| ROC-AUC             | 0.9930     |
+| PR-AUC              | 0.9878     |
+| EER                 | 2.228 %    |
+| Precision           | 97.60 %    |
+| Recall              | 97.08 %    |
+| FAR                 | 0.421 %    |
+| FRR                 | 2.917 %    |
+| TAR @ FAR = 10⁻³   | 96.39 %    |
+| TAR @ FAR = 10⁻⁴   | 94.90 %    |
+| Decision threshold  | 0.1990     |
+| Positive pairs      | 88 003     |
 | Negative pairs      | 500 000    |
 
 ---
