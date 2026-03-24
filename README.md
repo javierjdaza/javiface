@@ -29,6 +29,12 @@ Inference runs on **CUDA**, **CoreML**, or **CPU** — automatically selected ba
 pip install javiface
 ```
 
+or
+
+```bash
+poetry add javiface
+```
+
 **GPU acceleration (NVIDIA CUDA):** replace the default `onnxruntime` with `onnxruntime-gpu`:
 
 ```bash
