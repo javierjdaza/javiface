@@ -29,6 +29,16 @@ Inference runs on **CUDA**, **CoreML**, or **CPU** — automatically selected ba
 pip install javiface
 ```
 
+**GPU acceleration (NVIDIA CUDA):** replace the default `onnxruntime` with `onnxruntime-gpu`:
+
+```bash
+pip install javiface
+pip uninstall onnxruntime
+pip install "onnxruntime-gpu>=1.22.0"
+```
+
+CPU / CoreML users don't need to do anything — `onnxruntime>=1.23.2` is installed automatically.
+
 ---
 
 ## Quick Start
@@ -64,6 +74,12 @@ print(result)
 | Similarity metric | Cosine                |
 | Normalize mean    | [0.485, 0.456, 0.406] |
 | Normalize std     | [0.229, 0.224, 0.225] |
+
+---
+
+## Model Card
+
+Full training details, architecture breakdown, and test-set evaluation metrics are documented in the [Model Card](MODEL_CARD.md).
 
 ---
 
