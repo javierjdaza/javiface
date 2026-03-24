@@ -21,7 +21,7 @@ class RetinaFaceONNXInference:
     def __init__(
         self,
         model_path,
-        conf_threshold=0.02,
+        conf_threshold=0.3,
         pre_nms_topk=5000,
         nms_threshold=0.4,
         post_nms_topk=750,
@@ -210,6 +210,33 @@ class RetinaFaceONNXInference:
         # Concatenate detections and landmarks
         return np.concatenate((detections, landmarks), axis=1), original_image
 
+
+    # -- Get Face Fuction ---
+    def crop_face_rf(self, image_pillow, vis_threshold = 0.8, expand_face_area=0.2):
+        image_array = np.array(image_pillow)
+        detections, landmarks = self.infer(image_array)
+        
+        if vis_threshold:
+            detections = [d for d in detections if d[4] >= vis_threshold]
+        else:
+            detections = [d for d in detections if d[4] >= self.vis_threshold]
+        
+        if len(detections) > 0:
+            best = max(detections, key=lambda d: (d[2] - d[0]) * (d[3] - d[1]))
+            left, top, right, bottom = int(best[0]), int(best[1]), int(best[2]), int(best[3])
+        
+            w, h = image_pillow.size
+            pw = (right - left) * expand_face_area
+            ph = (bottom - top) * expand_face_area
+            left   = max(0, int(left - pw))
+            top    = max(0, int(top - ph))
+            right  = min(w, int(right + pw))
+            bottom = min(h, int(bottom + ph))
+            
+            return image_pillow.crop((left, top, right, bottom)), float(best[4])
+        else:
+            return None
+
 class PriorBox:
     def __init__(self, cfg: dict, image_size: Tuple[int, int]) -> None:
         super().__init__()
@@ -243,28 +270,3 @@ class PriorBox:
         return output
 
 
-# -- Get Face Fuction ---
-def crop_face_rf(detector, image_pillow, vis_threshold, expand_face_area=0.2):
-    image_array = np.array(image_pillow)
-    detections, landmarks = detector.infer(image_array)
-    
-    if vis_threshold:
-        detections = [d for d in detections if d[4] >= vis_threshold]
-    else:
-        detections = [d for d in detections if d[4] >= detector.vis_threshold]
-    
-    if len(detections) > 0:
-        best = max(detections, key=lambda d: (d[2] - d[0]) * (d[3] - d[1]))
-        left, top, right, bottom = int(best[0]), int(best[1]), int(best[2]), int(best[3])
-    
-        w, h = image_pillow.size
-        pw = (right - left) * expand_face_area
-        ph = (bottom - top) * expand_face_area
-        left   = max(0, int(left - pw))
-        top    = max(0, int(top - ph))
-        right  = min(w, int(right + pw))
-        bottom = min(h, int(bottom + ph))
-        
-        return image_pillow.crop((left, top, right, bottom))
-    else:
-        return None
