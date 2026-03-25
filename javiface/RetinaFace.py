@@ -21,7 +21,7 @@ class RetinaFaceONNXInference:
     def __init__(
         self,
         model_path,
-        conf_threshold=0.3,
+        conf_threshold=0.05,
         pre_nms_topk=5000,
         nms_threshold=0.4,
         post_nms_topk=750,
