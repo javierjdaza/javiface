@@ -2,3 +2,5 @@ onnxruntime >= 1.23.2
 onnxscript >= 0.6.2
 torch >= 1.7.1
 torchvision >= 0.25.0
+keras >= 3.13.2
+tf-keras >= 2.20.1
