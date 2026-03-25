@@ -1,6 +1,6 @@
 # JaviFace 🎯
 
-**Accurate face comparison powered by ONNX — selfie vs selfie, selfie vs ID, ID vs ID.**
+**Accurate face comparison — selfie vs selfie, selfie vs ID, ID vs ID.**
 
 [![PyPI version](https://img.shields.io/pypi/v/javiface)](https://pypi.org/project/javiface/)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
@@ -12,14 +12,14 @@
 
 JaviFace is a lightweight Python library for **face verification**. Given two face images, it tells you whether they belong to the same person — with scenario-specific thresholds calibrated for selfie and ID document comparisons.
 
-Under the hood it runs two ONNX models:
+Under the hood it runs two models:
 
-| Component                  | Role                                  |
-| -------------------------- | ------------------------------------- |
-| **RetinaFace** (ResNet-34) | Face detection & crop                 |
-| **FaceVerifier**           | 512-dim embedding + cosine similarity |
+| Component                  | Format        | Role                                  |
+| -------------------------- | ------------- | ------------------------------------- |
+| **RetinaFace** (ResNet-50) | TensorFlow H5 | Face detection, alignment & crop      |
+| **FaceVerifier**           | ONNX          | 512-dim embedding + cosine similarity |
 
-Inference runs on **CUDA**, **CoreML**, or **CPU** — automatically selected based on your hardware.
+**FaceVerifier** runs on **CUDA**, **CoreML**, or **CPU** — automatically selected based on your hardware.
 
 ---
 
@@ -35,15 +35,18 @@ or
 poetry add javiface
 ```
 
+**Required:** `tensorflow` for RetinaFace detection. On TF ≥ 2.16 also install:
+
+```bash
+pip install tf-keras
+```
+
 **GPU acceleration (NVIDIA CUDA):** replace the default `onnxruntime` with `onnxruntime-gpu`:
 
 ```bash
-pip install javiface
 pip uninstall onnxruntime
 pip install "onnxruntime-gpu>=1.22.0"
 ```
-
-CPU / CoreML users don't need to do anything — `onnxruntime>=1.23.2` is installed automatically.
 
 ---
 
@@ -51,22 +54,25 @@ CPU / CoreML users don't need to do anything — `onnxruntime>=1.23.2` is instal
 
 ```python
 from PIL import Image
-from javiface import JaviFace
-from javiface import RetinaFace
+from javiface import JaviFace, RetinaFace as rf
 
 # Load models
-detector  = RetinaFace("retinaface_r34.onnx")
-verifier  = JaviFace("javi_face_v1.onnx")
+model = rf.build_model("retinaface.h5")
+verifier = JaviFace("javi_face_v1.onnx")
 
 # Load images
 img1 = Image.open("selfie.jpg")
 img2 = Image.open("id_photo.jpg")
 
+# Crop & align faces (PIL in → PIL out)
+face1 = rf.get_face(img1, model)
+face2 = rf.get_face(img2, model)
+
 # Compare
 # threshold = 0.2621 -> Selfie vs Selfie [default]
 # threshold = 0.1838 -> Selfie vs ID document
 # threshold = 0.1990 -> ID document vs ID document
-result = verifier.compare(img1, img2, threshold = 0.2621)
+result = verifier.compare(face1, face2, threshold=0.2621)
 
 print(result)
 # {'similarity': 0.214, 'same_person': False}
@@ -86,7 +92,18 @@ print(result)
 
 ---
 
-## Model Card — `javi_face_v1.onnx`
+## Model Cards
+
+### `retinaface.h5` — Face Detector
+
+| Field            | Value                             |
+| ---------------- | --------------------------------- |
+| **Architecture** | ResNet-50 + FPN + SSH heads       |
+| **Framework**    | TensorFlow / Keras                |
+| **Output**       | Bounding boxes + 5 face landmarks |
+| **Primary use**  | Face detection, alignment & crop  |
+
+### `javi_face_v1.onnx` — Face Verifier
 
 > ResNet-50 backbone + ArcFace head, trained from scratch on ~860 K face images across 94 K identities.
 
@@ -130,13 +147,15 @@ Choose the threshold that matches your use case. A similarity **≥ threshold** 
 
 ## Hardware Acceleration
 
-JaviFace automatically selects the best available provider:
+**FaceVerifier** (ONNX) automatically selects the best available provider:
 
 ```
 FaceVerifier loaded — provider: CoreML   # macOS
 FaceVerifier loaded — provider: CUDA     # NVIDIA GPU
 FaceVerifier loaded — provider: CPU      # fallback
 ```
+
+**RetinaFace** (TensorFlow) uses whatever device TF has available. Set `TF_FORCE_GPU_ALLOW_GROWTH=true` (already set internally) to avoid reserving all VRAM.
 
 ---
 

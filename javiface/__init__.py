@@ -1,8 +1,8 @@
 import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from javiface.JaviFace import FaceVerifier as JaviFace
-from javiface.RetinaFace import RetinaFaceONNXInference as RetinaFace
+from javiface import RetinaFace
 
-__all__ = ["JaviFace"]
+__all__ = ["JaviFace", "RetinaFace"]
 
 
 """
@@ -11,5 +11,5 @@ Javi Face.
 Accurate Faces Comparison.
 """
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __author__ = 'Javier Javier Daza Olivella'
