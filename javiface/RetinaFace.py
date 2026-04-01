@@ -872,3 +872,5 @@ def get_face(
         return None
     largest = max(faces, key=lambda x: x.shape[0] * x.shape[1])
     return _Image.fromarray(largest.astype('uint8'))
+
+
