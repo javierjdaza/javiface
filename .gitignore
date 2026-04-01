@@ -1,3 +1,14 @@
 *.json
 *.pth
 *.onnx
+*.h5
+*.pt
+*.ckpt
+*.log
+*.csv
+*.tsv
+*.txt
+*.zip
+*.tar.gz
+*.egg-info
+__pycache__/
