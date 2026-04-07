@@ -13,5 +13,5 @@ Javi Face.
 Accurate Faces Comparison.
 """
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 __author__ = 'Javier Javier Daza Olivella'

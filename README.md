@@ -1,6 +1,6 @@
 # JaviFace 🎯
 
-**Accurate face comparison — selfie vs selfie, selfie vs ID, ID vs ID.**
+**Accurate selfie-to-selfie face verification.**
 
 [![PyPI version](https://img.shields.io/pypi/v/javiface)](https://pypi.org/project/javiface/)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
@@ -10,7 +10,7 @@
 
 ## What is JaviFace?
 
-JaviFace is a lightweight Python library for **face verification**. Given two face images, it tells you whether they belong to the same person — with scenario-specific thresholds calibrated for selfie and ID document comparisons.
+JaviFace is a lightweight Python library for **face verification**. Given two selfie images, it tells you whether they belong to the same person — with FAR-controlled thresholds calibrated on 1 M+ face images.
 
 Under the hood it runs two models:
 
@@ -54,25 +54,28 @@ pip install "onnxruntime-gpu>=1.22.0"
 
 ```python
 from PIL import Image
-from javiface import JaviFace, RetinaFace as rf
+from javiface import JaviFace, RetinaFace, RetinaFace34
 
 # Load models
-model = rf.build_model("retinaface.h5")
-verifier = JaviFace("javi_face_v1.onnx")
+rf   = RetinaFace(model_path="retinaface.h5")
+rf34 = RetinaFace34(model_path="retinaface_r34.onnx")  # fallback detector
+jf   = JaviFace(onnx_path="javi_face_v1.onnx")
 
 # Load images
-img1 = Image.open("selfie.jpg")
-img2 = Image.open("id_photo.jpg")
+img1 = Image.open("selfie1.jpg")
+img2 = Image.open("selfie2.jpg")
 
-# Crop & align faces (PIL in → PIL out)
-face1 = rf.get_face(img1, model)
-face2 = rf.get_face(img2, model)
+# Detect & crop faces (PIL in → PIL out)
+face1 = rf.get_faces(img_pillow=img1, threshold=0.2)
+face2 = rf.get_faces(img_pillow=img2, threshold=0.2)
 
-# Compare
-# threshold = 0.2621 -> Selfie vs Selfie [default]
-# threshold = 0.1838 -> Selfie vs ID document
-# threshold = 0.1990 -> ID document vs ID document
-result = verifier.compare(face1, face2, threshold=0.2621)
+# Compare — choose threshold based on your FAR requirement:
+# threshold = 0.2166 -> Youden index (balanced TPR/FPR) [default]
+# threshold = 0.2136 -> FAR ≤ 10⁻³  | TAR = 99.30 %
+# threshold = 0.2629 -> FAR ≤ 10⁻⁴  | TAR = 99.09 %
+# threshold = 0.3095 -> FAR ≤ 10⁻⁵  | TAR = 98.95 %
+# threshold = 0.3242 -> FAR ≤ 10⁻⁶  | TAR = 98.91 %
+result = jf.compare(face1, face2, threshold=0.2629)  # TAR@FAR=1e-4
 
 print(result)
 # {'similarity': 0.214, 'same_person': False}
@@ -105,23 +108,32 @@ print(result)
 
 ### `javi_face_v1.onnx` — Face Verifier
 
-> ResNet-50 backbone + ArcFace head, trained from scratch on ~860 K face images across 94 K identities.
+> ResNet-50 backbone + ArcFace head, trained from scratch on ~1 M selfie images across 232 K identities.
 
-| Field             | Value                                    |
-| ----------------- | ---------------------------------------- |
-| **Architecture**  | ResNet-50 + ArcFace (m=0.5, s=64)        |
-| **Embedding dim** | 512 — L2-normalized (unit hypersphere)   |
-| **Training data** | 861 597 images · 94 261 identities       |
-| **Export format** | ONNX (CUDA / CoreML / CPU)               |
-| **Primary use**   | KYC — selfie vs ID document verification |
+| Field             | Value                                        |
+| ----------------- | -------------------------------------------- |
+| **Architecture**  | ResNet-50 + ArcFace (m=0.5, s=64)            |
+| **Embedding dim** | 512 — L2-normalized (unit hypersphere)        |
+| **Training data** | 1 025 203 images · 232 659 identities        |
+| **Parameters**    | 119 855 168 total · 118 410 240 trainable     |
+| **Export format** | ONNX (CUDA / CoreML / CPU)                   |
+| **Primary use**   | Selfie vs selfie face verification            |
 
-### Performance
+### Performance — Selfie vs Selfie
 
-| Scenario              | ROC-AUC | EER     | Precision | Recall  |
-| --------------------- | ------- | ------- | --------- | ------- |
-| Selfie vs Selfie      | 0.9993  | 0.485 % | 99.54 %   | 99.33 % |
-| Selfie vs ID document | 0.9951  | 1.862 % | 97.31 %   | 97.47 % |
-| ID vs ID              | 0.9930  | 2.228 % | 97.60 %   | 97.08 % |
+Evaluated on 150 000 genuine pairs and 1 000 000 impostor pairs.
+
+| Metric           | Value   |
+| ---------------- | ------- |
+| ROC-AUC          | 0.9987  |
+| PR-AUC           | 0.9975  |
+| EER              | 0.53 %  |
+| Precision        | 99.41 % |
+| Recall           | 99.29 % |
+| TAR @ FAR = 10⁻³ | 99.30 % |
+| TAR @ FAR = 10⁻⁴ | 99.09 % |
+| TAR @ FAR = 10⁻⁵ | 98.95 % |
+| TAR @ FAR = 10⁻⁶ | 98.91 % |
 
 #### Similarity Distribution — Selfie vs Selfie
 
@@ -131,17 +143,19 @@ Full training details and evaluation breakdown → [MODEL_CARD.md](MODEL_CARD.md
 
 ---
 
-## Thresholds
+## Thresholds — Selfie vs Selfie
 
-Choose the threshold that matches your use case. A similarity **≥ threshold** means same person.
+A similarity **≥ threshold** means same person. Choose based on your FAR requirement:
 
-| Scenario              | Threshold | Use when                  |
-| --------------------- | --------- | ------------------------- |
-| Selfie vs Selfie      | `0.2621`  | Comparing two live photos |
-| Selfie vs ID document | `0.1838`  | KYC / onboarding flows    |
-| ID vs ID              | `0.1990`  | Document deduplication    |
+| Operating point        | Threshold | TAR     | Use when                                    |
+| ---------------------- | --------- | ------- | ------------------------------------------- |
+| Youden (balanced)      | `0.2166`  | —       | General use, balanced FAR/FRR               |
+| FAR ≤ 10⁻³ (0.1 %)    | `0.2136`  | 99.30 % | Moderate security (consumer apps)           |
+| FAR ≤ 10⁻⁴ (0.01 %)   | `0.2629`  | 99.09 % | Standard KYC / onboarding                  |
+| FAR ≤ 10⁻⁵ (0.001 %)  | `0.3095`  | 98.95 % | High-security verification                  |
+| FAR ≤ 10⁻⁶ (0.0001 %) | `0.3242`  | 98.91 % | Critical applications (banking, government) |
 
-> **Lower threshold → stricter match.** ID photos have less variation than selfies, so the bar is lower.
+> **Higher threshold → stricter match → lower FAR.** Raising the bar reduces false accepts at the cost of a marginally lower true accept rate.
 
 ---
 
