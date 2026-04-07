@@ -814,7 +814,6 @@ def extract_faces(
         facial_area = identity["facial_area"]
         rotate_angle = 0
         rotate_direction = 1
-
         x = facial_area[0]
         y = facial_area[1]
         w = facial_area[2] - x
@@ -851,26 +850,26 @@ def extract_faces(
     return resp
 
 
-def get_face(
-    img_pillow: Any,
-    model: Model,
-    align: bool = True,
-    allow_upscaling: bool = True,
-    expand_face_area: int = 20,
-) -> Optional[Any]:
-    from PIL import Image as _Image
-    img_array = np.array(img_pillow)[:, :, ::-1]  # PIL RGB → BGR numpy
-    faces = extract_faces(
-        img_path=img_array,
-        model=model,
-        align=align,
-        allow_upscaling=allow_upscaling,
-        expand_face_area=expand_face_area,
-    )
-    faces = [f for f in faces if f is not None and f.shape[0] > 0 and f.shape[1] > 0]
-    if not faces:
-        return None
-    largest = max(faces, key=lambda x: x.shape[0] * x.shape[1])
-    return _Image.fromarray(largest.astype('uint8'))
 
 
+
+class RetinaFace:
+    def __init__(self, weights_path: str):
+        self.model = build_model(weights_path)
+    
+    def get_faces(self, img_pillow, align: bool = True, allow_upscaling: bool = True, expand_face_area: int = 20,threshold = 0.8):
+        img_array = np.array(img_pillow)[:, :, ::-1]  # PIL RGB → BGR
+        faces = extract_faces(
+            img_path=img_array,
+            model=self.model,
+            align=align,
+            allow_upscaling=allow_upscaling,
+            expand_face_area=expand_face_area,
+            threshold = threshold
+        )
+        if faces:
+            faces = [Image.fromarray(face.astype('uint8')) for face in faces]
+        
+        return faces if faces else None
+
+    
